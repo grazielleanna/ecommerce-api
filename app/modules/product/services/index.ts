@@ -67,6 +67,26 @@ export default class ProductService {
         });
     }
 
+    public async deleteProduct(productId: number) {
+        const product = await Product.findBy('id', productId);
+
+        if (!product) {
+            throw new NotFoundException(`Product with id ${productId} not found.`);
+        }
+
+        await db.transaction(async (trx) => {
+            try {
+                const productUuid = product.uuid.toUpperCase();
+                await EcommerceFile.query({ client: trx }).where('uuid', productUuid).delete();
+
+                await product.delete();
+            } catch (error) {
+                trx.rollback();
+                throw new BadRequestException(error);
+            }
+        })
+    }
+
     /**
      * @author: Grazielle Conceição
      * @since: 2024-05-23

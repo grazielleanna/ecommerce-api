@@ -42,4 +42,12 @@ export default class ProductControllers {
 
         return response.ok(product);
     }
+
+    async destroy({ response, params }: HttpContext){
+        const productId = params.id;
+
+        await this.productService.deleteProduct(productId);
+
+        return response.noContent();
+    }
 }
